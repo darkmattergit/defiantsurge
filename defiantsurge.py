@@ -56,7 +56,29 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 
-def get_targets_dict() -> dict:
+
+def get_targets_dict_list(csv_list: str = None) -> dict:
+    """
+    Reads in a list of target identifiers and their respective file paths from a CSV file so that the user does not have
+    to enter them manually.
+    :param csv_list: The absolute or relative path of the CSV file containing the list of target identifiers and DNR
+    paths.
+    :return: dict
+    """
+    csv_contents = {}
+    try:
+        with open(csv_list, "r") as cr:
+            csv_read = csv.reader(cr)
+            for target_identifiers, target_paths in csv_read:
+                csv_contents[target_identifiers] = target_paths
+
+    except FileNotFoundError:
+        print(f"[!] pathError :: Could not find '{csv_list}', check path and try again")
+
+    return csv_contents
+
+
+def get_targets_dict_prompt() -> dict:
     """
     Prompt the user to provide the names of the targets and their associated DNR file paths.
     :return: dict
@@ -64,6 +86,7 @@ def get_targets_dict() -> dict:
     # Initialize dict to hold target names and their respective DNR file paths
     targets_dict = {}
 
+    print()
     # Provide user instruction on how to add targets
     print("[*] Enter the identifiers of the targets and the absolute or relative paths to their respective Dialed "
           "Number Record (DNR) files")
@@ -306,6 +329,8 @@ parser.add_argument("-e", "--export", help="Export results to a CSV file", defau
 parser.add_argument("-s", "--single", help="A special argument that can be used to specify that only "
                                              "the data in the first column should be analyzed",
                       action="store_true")
+parser.add_argument("-l", "--list", help="Use a CSV containing the target identifiers and their "
+                                         "respective file paths to skip adding them manually", default=None)
 parser.add_argument("-g", "--gpl", help="Print GPLv3 blurb and exit", action="store_true")
 
 args = parser.parse_args()
@@ -320,10 +345,17 @@ print(DEFAINTSURGE_BANNER)
 print("  Mutual Contacts Discovery Tool")
 print(f"  Version: {DEFIANTSURGE_VERSION}")
 print(f"  License: GPLv3")
-print()
 
-# Get user to enter the names and DNR files of targets
-targets_dnr_paths_dict = get_targets_dict()
+# Initialize empty dict to hold target identifiers and their respective DNR file paths
+targets_dnr_dict = {}
+
+if args.list is not None:
+    # Read in target identifiers and paths from the CSV list file
+    targets_dnr_paths_dict = get_targets_dict_list(args.list)
+
+else:
+    # Get user to enter the names and DNR files of targets
+    targets_dnr_paths_dict = get_targets_dict_prompt()
 
 # No targets entered, exit
 if len(targets_dnr_paths_dict) == 0:
