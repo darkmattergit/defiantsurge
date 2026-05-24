@@ -21,11 +21,11 @@ Windows:
 `py defiantsurge.py`
 
 The following arguments are also available:
-`-e, --export`: Export the results to a CSV file - OPTIONAL
-`-s, --single`: A special argument that is used to specify that only the data in the first column should be analyzed, or 
+* `-e, --export`: Export the results to a CSV file - OPTIONAL
+* `-s, --single`: A special argument that is used to specify that only the data in the first column should be analyzed, or 
 that the record files only contain one column. - OPTIONAL
-`-g, --gpl`: Displays a small blurb about the GPLv3 license. - OPTIONAL
-`-h, --help`: Display the help banner. - OPTIONAL
+* `-g, --gpl`: Displays a small blurb about the GPLv3 license. - OPTIONAL
+* `-h, --help`: Display the help banner. - OPTIONAL
 
 > [!IMPORTANT]
 > When the `-s, --single` argument is used, it applies to **ALL** of the files used in the analysis. This means that even
@@ -88,14 +88,10 @@ This section provides a list of terminology used in DEFIANTSURGE and their defin
 
 ## Errors
 The following is a list of all error names, their descriptions, and what might cause them:
-* `emptyPathError`: `No file path entered`. This error occurs when an empty string is passed to DEFIANTSURGE when it asks for \\
-the path to a target's DNR file.
-* `pathError`: `Could not find 'TARGET FILE PATH', check path and try again`. This error occurs when DEFIANTSURGE cannot find \\
-the the target's DNR file at the specified path. Check that you entered the path correctly and try again.
+* `emptyPathError`: `No file path entered`. This error occurs when an empty string is passed to DEFIANTSURGE when it asks for the path to a target's DNR file.
+* `pathError`: `Could not find 'TARGET FILE PATH', check path and try again`. This error occurs when DEFIANTSURGE cannot find the the target's DNR file at the specified path. Check that you entered the path correctly and try again.
 * `emptyExportPathError`: `No CSV export file path entered, analysis results will not be exported`.
-* `exportFileError`: `Could not open 'CSV EXPORT PATH' for writing, analysis results were not exported`. This error could occur \\
-either because the directory you wish to create the export file in does not exist or because you do not have `write` \\
-privileges for that directory. Check that you entered the path correctly and that you have the required privileges.
+* `exportFileError`: `Could not open 'CSV EXPORT PATH' for writing, analysis results were not exported`. This error could occur either because the directory you wish to create the export file in does not exist or because you do not have `write` privileges for that directory. Check that you entered the path correctly and that you have the required privileges.
 
 ## Branches
 This repository has 2 branches: `master` and `dev`. The `master` branch holds all of the stable code and is updated 
