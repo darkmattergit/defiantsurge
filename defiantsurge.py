@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import glob
 import csv
 import argparse
+import sqlite3
 
 # Handle exception raised on Windows-based machines
 try:
@@ -55,6 +56,8 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
+
+DEFIANTSURGE_SQL = ".defiantsurge_dnr.db"
 
 
 def get_targets_dict_list(csv_list: str = None) -> dict:
@@ -196,6 +199,14 @@ def read_in_target_contacts(target_dict: dict = None, single_column_only: bool =
     print()
     print("[*] Reading in DNR data")
 
+    # Create SQLite db that will be used to carry out additional types of analysis
+    conn = sqlite3.connect(DEFIANTSURGE_SQL)
+    crsr = conn.cursor()
+
+    # Create table
+    crsr.execute("CREATE TABLE IF NOT EXISTS dnr_contacts (target_identifier TEXT, contact_identifier TEXT)")
+    conn.commit()
+
     # Initialize dict to hold target identifiers and DNR file paths
     targets_contacts_dict = {}
 
@@ -212,7 +223,13 @@ def read_in_target_contacts(target_dict: dict = None, single_column_only: bool =
                 # that it is not a blank element
                 if (event_contacts[0].strip() not in targets_contacts_dict[dnr_paths] and event_contacts[0].strip()
                         not in target_dict and event_contacts[0] != "" and event_contacts[0].isspace() is False):
+
+                    # Add contact to list
                     targets_contacts_dict[dnr_paths].append(event_contacts[0].strip())
+                    # Add contact to table
+                    crsr.execute("INSERT INTO dnr_contacts VALUES (?, ?)", (dnr_paths,
+                                                                            event_contacts[0]))
+                    conn.commit()
 
                 # Read in and check the second element to make sure that it does not exist in the list already and
                 # that it is not a blank element. If the user has specified that only the first element is to be used,
@@ -221,7 +238,15 @@ def read_in_target_contacts(target_dict: dict = None, single_column_only: bool =
                         if (event_contacts[1].strip() not in targets_contacts_dict[dnr_paths] and
                                 event_contacts[1].strip() not in target_dict and event_contacts[1] != "" and
                         event_contacts[1].isspace() is False):
+                            # Add contact to list
                             targets_contacts_dict[dnr_paths].append(event_contacts[1].strip())
+                            # Add contact to table
+                            crsr.execute("INSERT INTO dnr_contacts VALUES (?, ?)", (dnr_paths,
+                                                                                    event_contacts[1]))
+                            conn.commit()
+
+    crsr.close()
+    conn.close()
 
     # Return dict containing a list of unique contacts found in each target-specific CSV
     return targets_contacts_dict
@@ -257,6 +282,7 @@ def discover_mutual_contacts(unique_contacts_dict: dict = None) -> dict:
                     if unique_contacts in unique_contacts_dict[master_targets]:
                         mutual_contacts_dict[dnr_targets].append([dnr_targets, unique_contacts, master_targets])
 
+    print()
     print("[+] Analysis complete")
 
     # Return dict containing mutual contacts
@@ -271,8 +297,11 @@ def display_mutual_contacts_results(mutual_contacts_dict: dict = None) -> None:
     """
     print()
 
+    print("=================================== MUTUAL CONTACTS ANALYSIS ===================================")
+    print()
+
     for dnr_targets in mutual_contacts_dict:
-        print(f"==================== {dnr_targets} ====================")
+        print(f"-------------------- {dnr_targets} --------------------")
         print()
 
         if len(mutual_contacts_dict[dnr_targets]) == 0:
@@ -286,6 +315,59 @@ def display_mutual_contacts_results(mutual_contacts_dict: dict = None) -> None:
         print()
         print(f"[*] Number of mutual contacts: {len(mutual_contacts_dict[dnr_targets])}")
         print()
+
+
+def get_contact_counts(mutual_contacts_dict: dict = None) -> None:
+    """
+    Count the number of targets that a contact is in communication with.
+    :param mutual_contacts_dict: The dict containing the targets and their respective contacts.
+    :return: None
+    """
+    conn = sqlite3.connect(DEFIANTSURGE_SQL)
+    crsr = conn.cursor()
+
+    # Get the total number of targets
+    total_target_number = len(mutual_contacts_dict)
+
+    # Get the total number of time each contact appears which will indicate the number of targets they are in
+    # communication with
+    crsr.execute("SELECT contact_identifier, COUNT(contact_identifier) FROM dnr_contacts GROUP BY 1 ORDER BY 2 DESC")
+    count_results = crsr.fetchall()
+
+    print("=================================== CONTACT OCCURRENCE COUNTS ===================================")
+    print()
+
+    # Initialize int to hold len of longest contact name
+    longest_name = 0
+
+    for contact_lens in count_results:
+        if len(contact_lens[0]) > longest_name:
+            longest_name = len(contact_lens[0])
+
+    # Add additional buffer spacing depending on the len of the longest name
+    if longest_name < 12:
+        longest_name += 19
+    else:
+        longest_name += 2
+
+    # Calculate the spacing needed between the two headers
+    header_spacing = longest_name - 17
+
+    # Display results
+    print(f" Contact Identifier {'':{header_spacing}} Occurrence Counts")
+    print(f" ------------------ {'':{header_spacing}} -----------------")
+    for contacts_name, contacts_count in count_results:
+        spacing_required = longest_name - len(contacts_name)
+        print(f" {contacts_name}: {'':{spacing_required}} {contacts_count}/{total_target_number}")
+
+    print()
+
+    # Clear data from SQLite file
+    crsr.execute("DELETE FROM dnr_contacts")
+    conn.commit()
+
+    crsr.close()
+    conn.close()
 
 
 def export_analysis_results_csv(csv_export_path: str = None, mutual_contacts_dict: dict = None) -> None:
@@ -383,6 +465,9 @@ discovered_mutual_contacts_dict = discover_mutual_contacts(targets_unique_contac
 
 # Display the analysis results
 display_mutual_contacts_results(discovered_mutual_contacts_dict)
+
+# Get number of targets a contact is found communicating with
+get_contact_counts(targets_unique_contacts_dict)
 
 # Export analysis results if the -e, --export arg is used
 if args.export is not None:
