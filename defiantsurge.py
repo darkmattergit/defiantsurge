@@ -57,6 +57,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 
+# Constant for name of SQLite file
 DEFIANTSURGE_SQL = ".defiantsurge_dnr.db"
 
 
@@ -188,7 +189,8 @@ def confirm_target_dict(target_dict: dict = None) -> bool:
     else:
         return False
 
-def read_in_target_contacts(target_dict: dict = None, single_column_only: bool = None) -> dict:
+
+def read_in_target_contacts(target_dict: dict = None, single_column_only: bool = None) -> None:
     """
     Read-in the contacts from the target's files and return a dict where the key is the target names and the values are
     lists holding the unique contacts found in the files.
@@ -207,85 +209,69 @@ def read_in_target_contacts(target_dict: dict = None, single_column_only: bool =
     crsr.execute("CREATE TABLE IF NOT EXISTS dnr_contacts (target_identifier TEXT, contact_identifier TEXT)")
     conn.commit()
 
-    # Initialize dict to hold target identifiers and DNR file paths
-    targets_contacts_dict = {}
-
     for dnr_paths in target_dict:
-        # Create a list for each target identifier
-        targets_contacts_dict[dnr_paths] = []
+        target_contacts_list = []
 
-        # Open target-specific CSV
         with open(target_dict[dnr_paths], "r") as dr:
             dnr_read = csv.reader(dr)
 
             for event_contacts in dnr_read:
-                # Read in and check the first element to make sure that it does not exist in the list already and
-                # that it is not a blank element
-                if (event_contacts[0].strip() not in targets_contacts_dict[dnr_paths] and event_contacts[0].strip()
-                        not in target_dict and event_contacts[0] != "" and event_contacts[0].isspace() is False):
+                    # Read in and check the first element to make sure that it does not exist in the list already and
+                    # that it is not a blank element
+                    if (event_contacts[0].strip() not in target_contacts_list and event_contacts[0].strip()
+                            not in target_dict and event_contacts[0] != "" and event_contacts[0].isspace() is False):
 
-                    # Add contact to list
-                    targets_contacts_dict[dnr_paths].append(event_contacts[0].strip())
-                    # Add contact to table
-                    crsr.execute("INSERT INTO dnr_contacts VALUES (?, ?)", (dnr_paths,
-                                                                            event_contacts[0]))
-                    conn.commit()
+                        # Add contact to list
+                        target_contacts_list.append(event_contacts[0].strip())
+                        # Add contact to table
+                        crsr.execute("INSERT INTO dnr_contacts VALUES (?, ?)", (dnr_paths,
+                                                                                event_contacts[0]))
+                        conn.commit()
 
-                # Read in and check the second element to make sure that it does not exist in the list already and
-                # that it is not a blank element. If the user has specified that only the first element is to be used,
-                # this part is skipped
-                if single_column_only is False:
-                        if (event_contacts[1].strip() not in targets_contacts_dict[dnr_paths] and
-                                event_contacts[1].strip() not in target_dict and event_contacts[1] != "" and
-                        event_contacts[1].isspace() is False):
-                            # Add contact to list
-                            targets_contacts_dict[dnr_paths].append(event_contacts[1].strip())
-                            # Add contact to table
-                            crsr.execute("INSERT INTO dnr_contacts VALUES (?, ?)", (dnr_paths,
-                                                                                    event_contacts[1]))
-                            conn.commit()
+                    # Read in and check the second element to make sure that it does not exist in the list already and
+                    # that it is not a blank element. If the user has specified that only the first element is to be
+                    # used, this part is skipped
+                    if single_column_only is False:
+                            if (event_contacts[1].strip() not in target_contacts_list and
+                                    event_contacts[1].strip() not in target_dict and event_contacts[1] != "" and
+                            event_contacts[1].isspace() is False):
+                                # Add contact to list
+                                target_contacts_list.append(event_contacts[1].strip())
+                                # Add contact to table
+                                crsr.execute("INSERT INTO dnr_contacts VALUES (?, ?)", (dnr_paths,
+                                                                                        event_contacts[1]))
+                                conn.commit()
 
     crsr.close()
     conn.close()
 
-    # Return dict containing a list of unique contacts found in each target-specific CSV
-    return targets_contacts_dict
 
-
-def discover_mutual_contacts(unique_contacts_dict: dict = None) -> dict:
+def discover_mutual_contacts(target_dict: dict = None) -> dict:
     """
-    Analyze the dict returned by the `read_in_targets_contacts` function to discover mutual contacts between
-    targets.
-    :param unique_contacts_dict: The dict returned by the `read_in_targets_contacts` function.
+    Analyze the combined data in the SQLite file to find mutual contacts.
+    :param target_dict: The dict returned by the `get_targets_dict` function.
     :return: dict
     """
     print("[*] Analyzing data, looking for mutual contacts")
 
-    # Initialize dict that will hold a lists nested within a primary list for each target
     mutual_contacts_dict = {}
 
-    for dnr_targets in unique_contacts_dict:
-        # Create the primary list for the current target in iteration
-        mutual_contacts_dict[dnr_targets] = []
+    conn = sqlite3.connect(DEFIANTSURGE_SQL)
+    crsr = conn.cursor()
 
-        # Iterate through the list of unique contacts for each target
-        for unique_contacts in unique_contacts_dict[dnr_targets]:
-            # Check to ensure that the current target being iterated is not being analyzed against itself
-            for master_targets in unique_contacts_dict:
-                if dnr_targets == master_targets:
-                    pass
-                # If the current target-specific contact is found to be in another target-specific list,
-                # create a list containing the primary target, the mutual contact, and the secondary target and then
-                # append the list to the primary list of the current iterated target
+    for target_identifiers in target_dict:
+        crsr.execute("SELECT target_identifier, contact_identifier FROM dnr_contacts WHERE target_identifier != ? "
+                     "AND contact_identifier IN (SELECT contact_identifier FROM dnr_contacts WHERE "
+                     "target_identifier = ?)",(target_identifiers, target_identifiers))
 
-                else:
-                    if unique_contacts in unique_contacts_dict[master_targets]:
-                        mutual_contacts_dict[dnr_targets].append([dnr_targets, unique_contacts, master_targets])
+        mutual_contacts_dict[target_identifiers] = crsr.fetchall()
+
+    crsr.close()
+    conn.close()
 
     print()
     print("[+] Analysis complete")
 
-    # Return dict containing mutual contacts
     return mutual_contacts_dict
 
 
@@ -310,8 +296,8 @@ def display_mutual_contacts_results(mutual_contacts_dict: dict = None) -> None:
             continue
 
         else:
-            for mutual_contacts in mutual_contacts_dict[dnr_targets]:
-                print(f" {mutual_contacts[0]} -----> {mutual_contacts[1]} <----- {mutual_contacts[2]}")
+            for mutual_contact in mutual_contacts_dict[dnr_targets]:
+                print(f" {dnr_targets} -----> {mutual_contact[1]} <----- {mutual_contact[0]}")
         print()
         print(f"[*] Number of mutual contacts: {len(mutual_contacts_dict[dnr_targets])}")
         print()
@@ -394,7 +380,9 @@ def export_analysis_results_csv(csv_export_path: str = None, mutual_contacts_dic
 
                     # Write mutual contacts to CSV
                     else:
-                        cwx.writerows(mutual_contacts_dict[dnr_targets])
+                        for mutual_data in mutual_contacts_dict[dnr_targets]:
+                            constructed_row = (dnr_targets, mutual_data[1], mutual_data[0])
+                            cwx.writerow(constructed_row)
 
             print(f"[+] Successfully exported analysis results to '{csv_export_path}'")
 
@@ -458,19 +446,19 @@ if not confirm_target_dict(targets_dnr_paths_dict):
     exit()
 
 # Get the unique contacts from each target's DNR file
-targets_unique_contacts_dict = read_in_target_contacts(targets_dnr_paths_dict, args.single)
+read_in_target_contacts(targets_dnr_paths_dict, args.single)
 
 # Analyze the unique contacts
-discovered_mutual_contacts_dict = discover_mutual_contacts(targets_unique_contacts_dict)
+mutual_contacts = discover_mutual_contacts(targets_dnr_paths_dict)
 
 # Display the analysis results
-display_mutual_contacts_results(discovered_mutual_contacts_dict)
+display_mutual_contacts_results(mutual_contacts)
 
 # Get number of targets a contact is found communicating with
-get_contact_counts(targets_unique_contacts_dict)
+get_contact_counts(mutual_contacts)
 
 # Export analysis results if the -e, --export arg is used
 if args.export is not None:
-    export_analysis_results_csv(args.export, discovered_mutual_contacts_dict)
+    export_analysis_results_csv(args.export, mutual_contacts)
 
 print(f"[+] Done")
