@@ -451,14 +451,14 @@ read_in_target_contacts(targets_dnr_paths_dict, args.single)
 # Analyze the unique contacts
 mutual_contacts = discover_mutual_contacts(targets_dnr_paths_dict)
 
+# Export analysis results if the -e, --export arg is used
+if args.export is not None:
+    export_analysis_results_csv(args.export, mutual_contacts)
+
 # Display the analysis results
 display_mutual_contacts_results(mutual_contacts)
 
 # Get number of targets a contact is found communicating with
 get_contact_counts(mutual_contacts)
-
-# Export analysis results if the -e, --export arg is used
-if args.export is not None:
-    export_analysis_results_csv(args.export, mutual_contacts)
 
 print(f"[+] Done")
