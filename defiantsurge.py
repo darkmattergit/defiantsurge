@@ -170,7 +170,7 @@ def confirm_target_dict(target_dict: dict = None) -> bool:
 
     # Display names and paths to respective DNR files for user to double-check and confirm
     print(" Target Identifiers and DNR File Paths")
-    print(" -------------------------------")
+    print(" -------------------------------------")
 
     for targets_confirm in target_dict:
         formatted_name = f"{targets_confirm}:"
