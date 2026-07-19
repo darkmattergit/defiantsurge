@@ -1,6 +1,6 @@
 # DEFIANTSURGE
-DEFIANTSURGE is a command line-based Mutual Contacts Discovery tool written in Python. It analyzes phone records to 
-uncover mutual contacts between multiple targets. 
+DEFIANTSURGE is a command line-based Mutual Contacts Discovery tool written in Python. It uses Graph Theory analytics to uncover
+hidden and indirect relationships between two or more targets by looking for mutual contacts between them.
 
 > [!TIP]
 > While DEFIANTSURGE was originally created to analyze Dialed Number Record (DNR) data, it can also be used to analyze 
