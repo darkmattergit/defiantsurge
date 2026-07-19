@@ -254,11 +254,14 @@ def discover_mutual_contacts(target_dict: dict = None) -> dict:
     """
     print("[*] Analyzing data, looking for mutual contacts")
 
+    # Initialize empty dict to hold targets as keys and the results from the SQL queries as their values
     mutual_contacts_dict = {}
 
     conn = sqlite3.connect(DEFIANTSURGE_SQL)
     crsr = conn.cursor()
 
+    # Iterate through the target_dict to find mutual contacts for the currently iterated target and add results to
+    # mutual_contacts_dict
     for target_identifiers in target_dict:
         crsr.execute("SELECT target_identifier, contact_identifier FROM dnr_contacts WHERE target_identifier != ? "
                      "AND contact_identifier IN (SELECT contact_identifier FROM dnr_contacts WHERE "
@@ -290,14 +293,18 @@ def display_mutual_contacts_results(mutual_contacts_dict: dict = None) -> None:
         print(f"-------------------- {dnr_targets} --------------------")
         print()
 
+        # Currently iterated target has no mutual contacts, inform user
         if len(mutual_contacts_dict[dnr_targets]) == 0:
             print(f"[*] No mutual contacts found for '{dnr_targets}'")
             print()
             continue
 
+        # Display mutual contacts
         else:
             for mutual_contact in mutual_contacts_dict[dnr_targets]:
                 print(f" {dnr_targets} -----> {mutual_contact[1]} <----- {mutual_contact[0]}")
+
+        # Display the number of mutual contacts target has
         print()
         print(f"[*] Number of mutual contacts: {len(mutual_contacts_dict[dnr_targets])}")
         print()
