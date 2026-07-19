@@ -24,6 +24,7 @@ The following arguments are also available:
 * `-e, --export`: Export the results to a CSV file - OPTIONAL
 * `-s, --single`: A special argument that is used to specify that only the data in the first column should be analyzed, or 
 that the record files only contain one column. - OPTIONAL
+* `-l, --list`: Use a CSV containing the target identifiers and their respective file paths to skip adding them manually. - OPTIONAL
 * `-g, --gpl`: Displays a small blurb about the GPLv3 license. - OPTIONAL
 * `-h, --help`: Display the help banner. - OPTIONAL
 
