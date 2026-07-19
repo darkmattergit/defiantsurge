@@ -349,15 +349,24 @@ def get_contact_counts(mutual_contacts_dict: dict = None) -> None:
     # Display results
     print(f" Contact Identifier {'':{header_spacing}} Target Communication Counts")
     print(f" ------------------ {'':{header_spacing}} ---------------------------")
+
     for contacts_name, contacts_count in count_results:
+        # Calculate spacing required between name and counts
         spacing_required = longest_name - len(contacts_name)
+
+        # Get target identifiers that contact communicates with
+        crsr.execute("SELECT DISTINCT(target_identifier) FROM dnr_contacts WHERE contact_identifier = ?",
+                     (contacts_name,))
+        contacts_results = crsr.fetchall()
+
+        # Print the contact identifier and their counts
         print(f" {contacts_name}: {'':{spacing_required}} {contacts_count}/{total_target_number}")
 
-    print()
+        # Print the target identifiers below the contact identifiers
+        for results in contacts_results:
+            print(f"  * {results[0]}")
 
-    # Clear data from SQLite file
-    crsr.execute("DELETE FROM dnr_contacts")
-    conn.commit()
+        print()
 
     crsr.close()
     conn.close()
@@ -398,6 +407,22 @@ def export_analysis_results_csv(csv_export_path: str = None, mutual_contacts_dic
             print(f"[!] exportFileError :: Could not open '{csv_export_path}' for writing, analysis results were "
                   f"not exported")
             print()
+
+
+def cleanup_sql() -> None:
+    """
+    Clears out data from SQLite file
+    :return: None
+    """
+    # Clear data from SQLite file
+    conn = sqlite3.connect(DEFIANTSURGE_SQL)
+    crsr = conn.cursor()
+
+    crsr.execute("DELETE FROM dnr_contacts")
+    conn.commit()
+
+    crsr.close()
+    conn.close()
 
 
 parser = argparse.ArgumentParser(prog="defiantsurge.py")
@@ -467,5 +492,8 @@ display_mutual_contacts_results(mutual_contacts)
 
 # Get number of targets a contact is found communicating with
 get_contact_counts(mutual_contacts)
+
+# Clear data from SQLite file
+cleanup_sql()
 
 print(f"[+] Done")
