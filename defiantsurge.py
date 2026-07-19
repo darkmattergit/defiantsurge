@@ -327,7 +327,7 @@ def get_contact_counts(mutual_contacts_dict: dict = None) -> None:
     crsr.execute("SELECT contact_identifier, COUNT(contact_identifier) FROM dnr_contacts GROUP BY 1 ORDER BY 2 DESC")
     count_results = crsr.fetchall()
 
-    print("=================================== CONTACT OCCURRENCE COUNTS ===================================")
+    print("=================================== TARGET COMMUNICATION COUNTS ===================================")
     print()
 
     # Initialize int to hold len of longest contact name
@@ -347,8 +347,8 @@ def get_contact_counts(mutual_contacts_dict: dict = None) -> None:
     header_spacing = longest_name - 17
 
     # Display results
-    print(f" Contact Identifier {'':{header_spacing}} Occurrence Counts")
-    print(f" ------------------ {'':{header_spacing}} -----------------")
+    print(f" Contact Identifier {'':{header_spacing}} Target Communication Counts")
+    print(f" ------------------ {'':{header_spacing}} ---------------------------")
     for contacts_name, contacts_count in count_results:
         spacing_required = longest_name - len(contacts_name)
         print(f" {contacts_name}: {'':{spacing_required}} {contacts_count}/{total_target_number}")
