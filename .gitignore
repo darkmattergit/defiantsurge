@@ -1,5 +1,4 @@
 .idea
-generate_test_dnr_data.py
 banner*
 *.csv
 generate_test_csv_list_data.py
