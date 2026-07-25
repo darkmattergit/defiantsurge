@@ -1,6 +1,6 @@
 import csv
 
-# This script creates 3 CSV files that contain test data is used to test DEFIANTSURGE during development as well as to
+# This script creates 4 CSV files that contain test data is used to test DEFIANTSURGE during development as well as to
 # provide users a way to learn to use DEFIANTSURGE
 
 # Alice test data
