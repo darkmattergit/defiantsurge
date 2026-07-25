@@ -75,6 +75,57 @@ that the information is incorrect, DEFIANTSURGE will then exit.
 > [!NOTE]
 > Analysis times may vary based on the number and size of data sets.
 
+### Types of Analysis 
+
+#### Mutual Contacts Analysis
+The Mutual Contacts Analysis section is the main analytical section of DEFIANTSURGE. This is where the user is shown
+the results of the analysis. An example of what the results look like for a single target is shown below:
+```
+-------------------- carol --------------------
+
+ carol -----> reallysuperduperlongername <----- alice
+ carol -----> eve <----- alice
+ carol -----> longname <----- bob
+ carol -----> longername <----- bob
+
+[*] Number of mutual contacts: 4
+```
+
+Each target has their own section that displays any mutual contacts that were found. The identifiers in the middle are the 
+contacts that are shared between the two targets shown on either side of them. Below the results is a count of the total number 
+of mutual contacts found for that target. If there are no mutual contacts found for a specific target, then the user is informed 
+that the target shares no contacts with any other targets.
+
+#### Target Communication Counts
+The Target Communication Counts section provides the user a quick way to identify key contacts of interest by showing them
+a counts of how many targets a contact is in communication with as well as which targets a contact communicates with. Below 
+is an example of what this section looks like:
+```
+ Contact Identifier             Target Communication Counts
+ ------------------             ---------------------------
+ reallysuperduperlongername:    2/3
+  * alice
+  * carol
+
+ longname:                      2/3
+  * bob
+  * carol
+
+ longername:                    2/3
+  * bob
+  * carol
+
+ eve:                           2/3
+  * alice
+  * carol
+
+ bob2:                          1/3
+  * alice
+```
+
+The `Target Communication Counts` column shows how many targets out of the total number of targets that specific contact
+is in communication with and underneath each contact identifier is shown which targets they communicate with.
+
 ## Exporting Results
 If you would like export the results of the analysis to a CSV file, use the `-e, --export` argument.
 Example:
