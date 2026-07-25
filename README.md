@@ -131,6 +131,9 @@ If you would like export the results of the analysis to a CSV file, use the `-e,
 Example:
 `python3 defiantsurge.py -e "results_export.csv"`
 
+> [!NOTE]
+> Only the results from the `Mutual Contacts Analysis` section are exported to the CSV file.
+
 ## Terminology
 This section provides a list of terminology used in DEFIANTSURGE and their definitions:
 * `Dialed Number Record (DNR)`: A file containing the phone record metadata.
