@@ -134,6 +134,18 @@ Example:
 > [!NOTE]
 > Only the results from the `Mutual Contacts Analysis` section are exported to the CSV file.
 
+## Generating Test Data
+The `generate_test_dnr_data.py` file is used to generate a small amount of fictional test data that is used to test DEFIANTSURGE 
+during development. However, it is also meant to be used by users as a way to learn how to use DEFIANTSURGE as well. The script 
+creates 4 CSV files:
+* `alice_test.csv`
+* `bob_test.csv`
+* `carol_test.csv`
+* `dnr_path_list.csv`
+
+The first 3 files contain test data for their respective targets, while `dnr_path_list.csv` is a "list file" that can be used
+with the `-l, --list` arg.  
+
 ## Terminology
 This section provides a list of terminology used in DEFIANTSURGE and their definitions:
 * `Dialed Number Record (DNR)`: A file containing the phone record metadata.
