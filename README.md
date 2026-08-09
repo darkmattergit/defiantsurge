@@ -137,13 +137,18 @@ Example:
 ## Generating Test Data
 The `generate_test_dnr_data.py` file is used to generate a small amount of fictional test data that is used to test DEFIANTSURGE 
 during development. However, it is also meant to be used by users as a way to learn how to use DEFIANTSURGE as well. The script 
-creates 4 CSV files:
+creates 9 CSV files:
 * `alice_test.csv`
 * `bob_test.csv`
 * `carol_test.csv`
+* `dave_test.csv`
+* `trent_test.csv`
+* `walter_test.csv`
+* `peggy_test.csv`
+* `victor_test.csv`
 * `dnr_path_list.csv`
 
-The first 3 files contain test data for their respective targets, while `dnr_path_list.csv` is a "list file" that can be used
+The first 8 files contain test data for their respective targets, while `dnr_path_list.csv` is a "list file" that can be used
 with the `-l, --list` arg.  
 
 ## Terminology
