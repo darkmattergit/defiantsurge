@@ -209,7 +209,13 @@ def read_in_target_contacts(target_dict: dict = None, single_column_only: bool =
     crsr.execute("CREATE TABLE IF NOT EXISTS dnr_contacts (target_identifier TEXT, contact_identifier TEXT)")
     conn.commit()
 
+    # Delete any data that remained from the previous analysis
+    crsr.execute("DELETE FROM dnr_contacts")
+    conn.commit()
+
     for dnr_paths in target_dict:
+        print()
+        print(f"[*] Reading in '{dnr_paths}'")
         target_contacts_list = []
 
         with open(target_dict[dnr_paths], "r") as dr:
@@ -241,6 +247,10 @@ def read_in_target_contacts(target_dict: dict = None, single_column_only: bool =
                                 crsr.execute("INSERT INTO dnr_contacts VALUES (?, ?)", (dnr_paths,
                                                                                         event_contacts[1]))
                                 conn.commit()
+
+            print(f"[+] Successfully read in '{target_dict[dnr_paths]}'")
+
+    print()
 
     crsr.close()
     conn.close()
@@ -372,6 +382,123 @@ def get_contact_counts(mutual_contacts_dict: dict = None) -> None:
     conn.close()
 
 
+def jaccard_similarity_matrix(mutual_contacts_dict: dict = None) -> None:
+    """
+    Create a matrix that contains each target's Jaccard Similarity Coefficient to the others.
+    :param mutual_contacts_dict: The dict containing the targets and their respective contacts.
+    :return: None
+    """
+    conn = sqlite3.connect(DEFIANTSURGE_SQL)
+    crsr = conn.cursor()
+
+    print("=================================== JACCARD SIMILARITY MATRIX  ===================================")
+    print()
+
+    # Initialize int to hold the len of the highest target number matrix identifier
+    highest_num = 0
+
+    print(" Target Number Matrix Identifiers")
+    print(" --------------------------------")
+
+    # Iterate through mutual_contacts_dict with enumeration to assign matrix numbers to targets and get counts of unique
+    # contacts per target
+    for target_nums, target_identifiers in enumerate(mutual_contacts_dict):
+        crsr.execute("SELECT COUNT(*) FROM dnr_contacts WHERE target_identifier = ?", (target_identifiers,))
+        target_contact_counts = crsr.fetchall()[0][0]
+
+        mutual_contacts_dict[target_identifiers] = target_contact_counts
+
+        print(f" {target_nums + 1}) : {target_identifiers} - (Total number of contacts: {target_contact_counts})")
+
+        highest_num = len(str(target_nums)) + 4
+
+    print()
+
+    # Initialize list to hold matrix results
+    matrix_list = []
+
+    # Create matrix header
+    matrix_header_list = ["" * (7 - highest_num),]
+
+    # Create the matrix header containing the target number matrix identifiers
+    for i in range(len(mutual_contacts_dict)):
+        matrix_header_list.append(f" {i + 1})")
+
+    # Add the matrix header list to the master matrix list
+    matrix_list.append(matrix_header_list)
+
+    # Iterate through the targets in mutual_contacts_dict
+    for target_main in mutual_contacts_dict:
+        # Initialize a list to hold values for each target
+        target_list = []
+
+        # Nest iteration through targets in mutual_contacts_dict
+        for target_compare in mutual_contacts_dict:
+
+            # target_main and target_compare are the same, skip calculation
+            if target_main == target_compare:
+                target_list.append("----")
+
+            else:
+                # Get count of intersection between target_main and target_compare
+                crsr.execute("SELECT COUNT(contact_identifier) FROM dnr_contacts WHERE target_identifier = ? AND "
+                             "contact_identifier IN (SELECT contact_identifier FROM dnr_contacts WHERE "
+                             "target_identifier = ?)",
+                             (target_main, target_compare))
+                intersection_count = crsr.fetchall()[0][0]
+
+                # Get count of contacts unique to target_main
+                crsr.execute("SELECT COUNT(DISTINCT(contact_identifier)) FROM dnr_contacts WHERE "
+                             "target_identifier = ? AND contact_identifier NOT IN (SELECT DISTINCT(contact_identifier) "
+                             "FROM dnr_contacts WHERE target_identifier = ?)", (target_main, target_compare))
+                target_main_count = crsr.fetchall()[0][0]
+
+                # Get count of contacts unique to target compare
+                crsr.execute("SELECT COUNT(DISTINCT(contact_identifier)) FROM dnr_contacts WHERE "
+                             "target_identifier = ? AND contact_identifier NOT IN (SELECT DISTINCT(contact_identifier) "
+                             "FROM dnr_contacts WHERE target_identifier = ?)", (target_compare, target_main))
+                target_compare_count = crsr.fetchall()[0][0]
+
+                # Add intersection and unique contact counts together for union total
+                union_count = int(target_main_count) + int(target_compare_count) + int(intersection_count)
+
+                # Calculate Jaccard Similarity Coefficient
+                jaccard_coefficient = round(intersection_count / union_count, 2)
+
+                # To not mess with matrix alignment, add additional 0 and append results to target_main list
+                if jaccard_coefficient == 0.0:
+                    target_list.append("0.00")
+
+                else:
+                    if len(str(jaccard_coefficient)) <= 3:
+                        target_list.append(f"{str(jaccard_coefficient)}0")
+                    else:
+                        target_list.append(str(jaccard_coefficient))
+
+        # Append results to matrix_list
+        matrix_list.append(target_list)
+
+    print()
+
+    # Create header by joining elements in first nested list in matrix_list
+    matrix_header = f" {'':{highest_num}}".join(matrix_list[0])
+
+    print(f" {matrix_header}")
+    print(f"   {'-' * len(matrix_header)}")
+
+    # Remove the header list to be able to iterate through matrix_list and display results
+    matrix_list.pop(0)
+
+    for target_matrix_nums, jaccard_results in enumerate(matrix_list):
+        joined_row = f"{'':{highest_num}}".join(jaccard_results)
+        print(f" {target_matrix_nums + 1}){'':{highest_num}}{joined_row}")
+
+    print()
+
+    crsr.close()
+    conn.close()
+
+
 def export_analysis_results_csv(csv_export_path: str = None, mutual_contacts_dict: dict = None) -> None:
     """
     Exports analysis results to a CSV file.
@@ -492,6 +619,9 @@ display_mutual_contacts_results(mutual_contacts)
 
 # Get number of targets a contact is found communicating with
 get_contact_counts(mutual_contacts)
+
+# Jaccard Similarity Coefficient matrix analysis
+jaccard_similarity_matrix(mutual_contacts)
 
 # Clear data from SQLite file
 cleanup_sql()
