@@ -305,7 +305,7 @@ def display_mutual_contacts_results(mutual_contacts_dict: dict = None) -> None:
         # Currently iterated target has no mutual contacts, inform user
         if len(mutual_contacts_dict[dnr_targets]) == 0:
             print()
-            print(f"[*] No mutual contacts found for '{dnr_targets}'")
+            print(f"[*] No mutual connections found for '{dnr_targets}'")
             print()
             continue
 
@@ -328,7 +328,7 @@ def display_mutual_contacts_results(mutual_contacts_dict: dict = None) -> None:
 
         # Display the number of mutual contacts target has
         print()
-        print(f"[*] Number of mutual contacts: {len(mutual_contacts_dict[dnr_targets])}")
+        print(f"[*] Number of mutual connections: {len(mutual_contacts_dict[dnr_targets])}")
         print()
 
 
