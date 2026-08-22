@@ -301,18 +301,30 @@ def display_mutual_contacts_results(mutual_contacts_dict: dict = None) -> None:
 
     for dnr_targets in mutual_contacts_dict:
         print(f"-------------------- {dnr_targets} --------------------")
-        print()
 
         # Currently iterated target has no mutual contacts, inform user
         if len(mutual_contacts_dict[dnr_targets]) == 0:
+            print()
             print(f"[*] No mutual contacts found for '{dnr_targets}'")
             print()
             continue
 
         # Display mutual contacts
         else:
+            # Initialize variable to hold comparison target name to determine if spacing is required
+            compare_target = None
+
             for mutual_contact in mutual_contacts_dict[dnr_targets]:
+                # Add spacing if comparison target name differs
+                if compare_target != mutual_contact[0]:
+                    print()
+
+                # Display results
                 print(f" {dnr_targets} -----> {mutual_contact[1]} <----- {mutual_contact[0]}")
+
+                # Set target comparison name to currently iterated one
+                compare_target = mutual_contact[0]
+
 
         # Display the number of mutual contacts target has
         print()
