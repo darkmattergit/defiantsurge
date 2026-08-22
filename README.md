@@ -81,14 +81,24 @@ that the information is incorrect, DEFIANTSURGE will then exit.
 The Mutual Contacts Analysis section is the main analytical section of DEFIANTSURGE. This is where the user is shown
 the results of the analysis. An example of what the results look like for a single target is shown below:
 ```
--------------------- carol --------------------
+-------------------- alice --------------------
 
- carol -----> reallysuperduperlongername <----- alice
- carol -----> eve <----- alice
- carol -----> longname <----- bob
- carol -----> longername <----- bob
+ alice -----> eve <----- bob
+ alice -----> george <----- bob
+ alice -----> irene <----- bob
 
-[*] Number of mutual contacts: 4
+ alice -----> george <----- carol
+ alice -----> irene <----- carol
+
+ alice -----> george <----- peggy
+ alice -----> irene <----- peggy
+ alice -----> eve <----- peggy
+
+ alice -----> eve <----- victor
+ alice -----> george <----- victor
+ alice -----> irene <----- victor
+
+[*] Number of mutual connections: 11
 ```
 
 Each target has their own section that displays any mutual contacts that were found. The identifiers in the middle are the 
