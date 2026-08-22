@@ -126,6 +126,41 @@ is an example of what this section looks like:
 The `Target Communication Counts` column shows how many targets out of the total number of targets that specific contact
 is in communication with and underneath each contact identifier is shown which targets they communicate with.
 
+### Jaccard Similarity Matrix
+The Jaccard Similarity Matirx analysis section provides the user a way to measure how similar one target is to another by the
+contacts they share. This is done by using the `Jaccard Similarity Coefficient`, which is calculated by dividing the intersection
+of two sets of data by their union. The closer the value is to 1.00, the more similar and connected the two sets are. Below is
+an example of what this section looks like:
+```
+ Target Number Matrix Identifiers
+ --------------------------------
+ 1) : alice - (Total number of contacts: 3)
+ 2) : bob - (Total number of contacts: 3)
+ 3) : carol - (Total number of contacts: 4)
+ 4) : dave - (Total number of contacts: 2)
+ 5) : trent - (Total number of contacts: 0)
+ 6) : walter - (Total number of contacts: 3)
+ 7) : peggy - (Total number of contacts: 6)
+ 8) : victor - (Total number of contacts: 6)
+
+
+        1)       2)       3)       4)       5)       6)       7)       8)
+   ------------------------------------------------------------------------
+ 1)     ----     1.00     0.40     0.00     0.00     0.00     0.50     0.50
+ 2)     1.00     ----     0.40     0.00     0.00     0.00     0.50     0.50
+ 3)     0.40     0.40     ----     0.20     0.00     0.00     0.43     0.43
+ 4)     0.00     0.00     0.20     ----     0.00     0.00     0.33     0.14
+ 5)     0.00     0.00     0.00     0.00     ----     0.00     0.00     0.00
+ 6)     0.00     0.00     0.00     0.00     0.00     ----     0.00     0.00
+ 7)     0.50     0.50     0.43     0.33     0.00     0.00     ----     0.71
+ 8)     0.50     0.50     0.43     0.14     0.00     0.00     0.71     ----
+``` 
+
+Each target is given a matrix identifier, which is just a number assigned to each target in the order that they appear. These 
+numbers are used in the matrix to identify which values belong to which targets. In the cases where a target would be calculated
+against themselves, a `----` is shown to indicated that the calculation is not applicable because a target measured to themselves
+would always result in a value of 1.00.
+
 ## Exporting Results
 If you would like export the results of the analysis to a CSV file, use the `-e, --export` argument.
 Example:
