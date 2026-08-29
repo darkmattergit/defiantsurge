@@ -1,6 +1,6 @@
 """
 DEFIANTSURGE\n
-v1.0.1\n
+v1.0.2\n
 `Mutual Contacts Discovery tool`\n
 `Copyright (C) 2026 darkmattergit`\n
 --------------------------------------------\n
@@ -29,7 +29,7 @@ except ImportError:
     pass
 
 # DEFIANTSURGE version number const
-DEFIANTSURGE_VERSION = "1.0.1"
+DEFIANTSURGE_VERSION = "1.0.2"
 
 # DEFIANTSURGE opening banner art const
 DEFAINTSURGE_BANNER = r"""
