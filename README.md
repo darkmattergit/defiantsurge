@@ -108,29 +108,32 @@ that the target shares no contacts with any other targets.
 
 #### Target Communication Counts
 The Target Communication Counts section provides the user a quick way to identify key contacts of interest by showing them
-a counts of how many targets a contact is in communication with as well as which targets a contact communicates with. Below 
-is an example of what this section looks like:
+a counts of how many targets a contact is in communication with as well as which targets a contact communicates with. 
+Below is an example of what this section looks like:
 ```
- Contact Identifier             Target Communication Counts
- ------------------             ---------------------------
- reallysuperduperlongername:    2/3
-  * alice
-  * carol
+=================================== TARGET COMMUNICATION COUNTS ===================================
 
- longname:                      2/3
+ Contact Identifier           Target Communication Counts
+ ------------------           ---------------------------
+ irene:                       5/8
+  * alice
   * bob
   * carol
+  * peggy
+  * victor
 
- longername:                    2/3
+ george:                      5/8
+  * alice
   * bob
   * carol
+  * peggy
+  * victor
 
- eve:                           2/3
+ eve:                         4/8
   * alice
-  * carol
-
- bob2:                          1/3
-  * alice
+  * bob
+  * peggy
+  * victor
 ```
 
 The `Target Communication Counts` column shows how many targets out of the total number of targets that specific contact
